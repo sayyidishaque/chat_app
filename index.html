@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ishaque Chat App</title>
+    <style>
+        /* Style for the messages container */
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Style for each message */
+        #messages li {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 5px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        /* Incoming messages (aligned to the right) */
+        #messages li.incoming {
+            background-color: #e1ffc7; /* Light green background */
+            margin-left: auto; /* Push to the right */
+            text-align: right; /* Align text to the right */
+        }
+
+        /* Outgoing messages (aligned to the left) */
+        #messages li.outgoing {
+            background-color: #f1f1f1; /* Light gray background */
+            margin-right: auto; /* Push to the left */
+            text-align: left; /* Align text to the left */
+        }
+    </style>
+</head>
+<body>
+    <h1>FastAPI Chat App</h1>
+    <form id="chat-form">
+        <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
+        <button type="submit">Send</button>
+    </form>
+    <ul id="messages"></ul>
+
+    <script>
+        const clientId = Math.floor(Math.random() * 1000); // Generate a random client ID
+        const ws = new WebSocket(`ws://localhost:8000/ws/${clientId}`);
+
+        // Handle incoming messages
+        ws.onmessage = function(event) {
+            const messages = document.getElementById("messages");
+            const message = document.createElement("li");
+            message.textContent = event.data;
+            message.classList.add("incoming"); // Add class for incoming messages
+            messages.appendChild(message);
+        };
+
+        // Send messages
+        const form = document.getElementById("chat-form");
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const input = document.getElementById("message-input");
+            const messageText = input.value;
+
+            // Display the outgoing message immediately
+            const messages = document.getElementById("messages");
+            const outgoingMessage = document.createElement("li");
+            outgoingMessage.textContent = messageText;
+            outgoingMessage.classList.add("outgoing"); // Add class for outgoing messages
+            messages.appendChild(outgoingMessage);
+
+            // Send the message to the WebSocket server
+            ws.send(messageText);
+            input.value = "";
+        });
+    </script>
+</body>
+</html>
